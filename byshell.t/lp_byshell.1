@@ -1,0 +1,8 @@
+_lp_byshell () {
+    if   [[ $_LP_SHELL_bash = true ]]; then
+        echo -n "$1"
+    elif [[ $_LP_SHELL_zsh  = true ]]; then
+        echo -n "$2"
+    fi
+    return
+}
