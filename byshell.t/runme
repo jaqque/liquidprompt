@@ -1,14 +1,10 @@
 #!/bin/bash
 
 TESTS=${TESTS:-1000000}
-TIMEFMT='
-real    %*E
-user    %*U
-sys     %*S'
+TIMEFORMAT='real %R; user %U; sys %S'
+TIMEFMT='real %*E; user %*U; sys %*S'
 
 runtest () {
-  echo "LP_SHELL_bash=$_LP_SHELL_bash"
-  echo -n " LP_SHELL_zsh=$_LP_SHELL_zsh"
   i=0
   while [[ $i -lt $TESTS ]]; do
     _lp_byshell bash zsh > /dev/null
@@ -27,5 +23,5 @@ for submission in lp_byshell.*; do
   echo "== $submission =="
   source "$PWD/$submission"
   time ( runtest )
-  echo;echo
+  echo
 done
