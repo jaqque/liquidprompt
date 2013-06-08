@@ -181,8 +181,8 @@ _lp_source_config()
     local    CRIT_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{white}%K{red}"  )"
     local  DANGER_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{yellow}%K{red}" )"
 
-    local       GREEN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 2)${_LP_CLOSE_ESC}"                           "%F{green}"           )"
-    local  BOLD_GREEN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 2)${_LP_CLOSE_ESC}"                 "%B%F{green}"         )"
+    local       GREEN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 2)${_LP_CLOSE_ESC}"                          "%F{green}"           )"
+    local  BOLD_GREEN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 2)${_LP_CLOSE_ESC}"                "%B%F{green}"         )"
 
     local      YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 3)${_LP_CLOSE_ESC}"                          "%F{yellow}"          )"
     local BOLD_YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3)${_LP_CLOSE_ESC}"                "%B%F{yellow}"        )"
