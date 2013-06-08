@@ -168,36 +168,36 @@ _lp_source_config()
     # Colors: variables are local so they will have a value only
     # during config loading and will not conflict with other values
     # with the same names defined by the user outside the config.
-    local       BOLD="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}${_LP_CLOSE_ESC}"                             "%B"                  )"
+    local        BOLD="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}${_LP_CLOSE_ESC}"                             "%B"                  )"
 
-    local      BLACK="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 0)${_LP_CLOSE_ESC}"                          "%F{black}"           )"
-    local  BOLD_GRAY="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 0)${_LP_CLOSE_ESC}"                "%B%F{black}"         )"
-    local      WHITE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 7)${_LP_CLOSE_ESC}"                          "%F{white}"           )"
-    local BOLD_WHITE="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7)${_LP_CLOSE_ESC}"                "%B%F{white}"         )"
+    local       BLACK="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 0)${_LP_CLOSE_ESC}"                          "%F{black}"           )"
+    local   BOLD_GRAY="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 0)${_LP_CLOSE_ESC}"                "%B%F{black}"         )"
+    local       WHITE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 7)${_LP_CLOSE_ESC}"                          "%F{white}"           )"
+    local  BOLD_WHITE="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7)${_LP_CLOSE_ESC}"                "%B%F{white}"         )"
 
-    local        RED="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 1)${_LP_CLOSE_ESC}"                          "%F{red}"             )"
-    local   BOLD_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 1)${_LP_CLOSE_ESC}"                "%B%F{red}"           )"
-    local   WARN_RED="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 0 ; tput setab 1)${_LP_CLOSE_ESC}"           "%F{black}%K{red}"    )"
-    local   CRIT_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{white}%K{red}"  )"
-    local DANGER_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{yellow}%K{red}" )"
+    local         RED="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 1)${_LP_CLOSE_ESC}"                          "%F{red}"             )"
+    local    BOLD_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 1)${_LP_CLOSE_ESC}"                "%B%F{red}"           )"
+    local    WARN_RED="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 0 ; tput setab 1)${_LP_CLOSE_ESC}"           "%F{black}%K{red}"    )"
+    local    CRIT_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{white}%K{red}"  )"
+    local  DANGER_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{yellow}%K{red}" )"
 
-    local      GREEN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 2)${_LP_CLOSE_ESC}"                          "%F{green}"           )"
-    local BOLD_GREEN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 2)${_LP_CLOSE_ESC}"                "%B%F{green}"         )"
+    local       GREEN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 2)${_LP_CLOSE_ESC}"                           "%F{green}"           )"
+    local  BOLD_GREEN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 2)${_LP_CLOSE_ESC}"                 "%B%F{green}"         )"
 
-    local      YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 3)${_LP_CLOSE_ESC}"                         "%F{yellow}"          )"
-    local BOLD_YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3)${_LP_CLOSE_ESC}"               "%B%F{yellow}"        )"
+    local      YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 3)${_LP_CLOSE_ESC}"                          "%F{yellow}"          )"
+    local BOLD_YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3)${_LP_CLOSE_ESC}"                "%B%F{yellow}"        )"
 
-    local        BLUE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 4)${_LP_CLOSE_ESC}"                         "%F{blue}"            )"
-    local   BOLD_BLUE="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 4)${_LP_CLOSE_ESC}"               "%B%F{blue}"          )"
+    local        BLUE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 4)${_LP_CLOSE_ESC}"                          "%F{blue}"            )"
+    local   BOLD_BLUE="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 4)${_LP_CLOSE_ESC}"                "%B%F{blue}"          )"
 
-    local      PURPLE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 5)${_LP_CLOSE_ESC}"                         "%F{magenta}"         )"
-    local        PINK="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 5)${_LP_CLOSE_ESC}"               "%B%F{magenta}"       )"
+    local      PURPLE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 5)${_LP_CLOSE_ESC}"                          "%F{magenta}"         )"
+    local        PINK="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 5)${_LP_CLOSE_ESC}"                "%B%F{magenta}"       )"
 
-    local        CYAN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 6)${_LP_CLOSE_ESC}"                         "%F{cyan}"            )"
-    local   BOLD_CYAN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 6)${_LP_CLOSE_ESC}"               "%B%F{cyan}"          )"
+    local        CYAN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 6)${_LP_CLOSE_ESC}"                          "%F{cyan}"            )"
+    local   BOLD_CYAN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 6)${_LP_CLOSE_ESC}"                "%B%F{cyan}"          )"
 
     # NO_COL is special: it will be used at runtime, not just during config loading
-               NO_COL="$( _lp_byshell "${_LP_OPEN_ESC}${ti_sgr0}${_LP_CLOSE_ESC}"                            "%b%u%s%f%k"          )"
+               NO_COL="$( _lp_byshell "${_LP_OPEN_ESC}${ti_sgr0}${_LP_CLOSE_ESC}"                             "%b%u%s%f%k"          )"
 
     unset ti_sgr0 ti_bold ti_setaf
 
