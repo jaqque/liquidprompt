@@ -47,16 +47,6 @@
 
 # See the README.md file for a summary of features.
 
-# Return string, depending upon current shell: $1 for bash, $2, for zsh
-_lp_byshell () {
-    if   [[ $_LP_SHELL_bash = true ]]; then
-        echo -n "$1"
-    elif [[ $_LP_SHELL_zsh  = true ]]; then
-        echo -n "$2"
-    fi
-    return
-}
-
 # Check for recent enough version of bash.
 if test -n "$BASH_VERSION" -a -n "$PS1" -a -n "$TERM" ; then
     bash=${BASH_VERSION%.*}; bmajor=${bash%.*}; bminor=${bash#*.}
@@ -66,21 +56,25 @@ if test -n "$BASH_VERSION" -a -n "$PS1" -a -n "$TERM" ; then
     fi
     unset bash bmajor bminor
 
-    _LP_SHELL_bash=true
-     _LP_SHELL_zsh=false
+    _LP_SHELL=bash
+
+        _LP_OPEN_ESC="\["
+       _LP_CLOSE_ESC="\]"
+     _LP_USER_SYMBOL="\u"
+     _LP_HOST_SYMBOL="\h"
+     _LP_TIME_SYMBOL="\t"
 elif test -n "$ZSH_VERSION" ; then
-    _LP_SHELL_bash=false
-     _LP_SHELL_zsh=true
+    _LP_SHELL=zsh
+
+        _LP_OPEN_ESC="%{"
+       _LP_CLOSE_ESC="%}"
+     _LP_USER_SYMBOL="%n"
+     _LP_HOST_SYMBOL="%m"
+     _LP_TIME_SYMBOL="%*"
 else
     echo "liquidprompt: shell not supported" >&2
     return
 fi
-
-   _LP_OPEN_ESC="$( _lp_byshell "\[" "%{" )"
-  _LP_CLOSE_ESC="$( _lp_byshell "\]" "%}" )"
-_LP_USER_SYMBOL="$( _lp_byshell "\u" "%n" )"
-_LP_HOST_SYMBOL="$( _lp_byshell "\h" "%m" )"
-_LP_TIME_SYMBOL="$( _lp_byshell "\t" "%*" )"
 
 
 ###############
@@ -151,56 +145,96 @@ esac
 _lp_source_config()
 {
 
-    # TermInfo feature detection
-    local ti_sgr0="$( { tput sgr0 || tput me ; } 2>/dev/null )"
-    local ti_bold="$( { tput bold || tput md ; } 2>/dev/null )"
-    local ti_setaf
-    if tput setaf >/dev/null 2>&1 ; then
-        ti_setaf () { tput setaf "$1" ; }
-    elif tput AF >/dev/null 2>&1 ; then
-        # *BSD
-        ti_setaf () { tput AF "$1" ; }
-    else
-        [[ $_LP_SHELL_bash = true ]] && echo "liquidprompt: terminal $TERM not supported" >&2
-        ti_setaf () { : ; }
-    fi
+    case "$_LP_SHELL" in
+        bash)
+            # TermInfo feature detection
+            local ti_sgr0="$( { tput sgr0 || tput me ; } 2>/dev/null )"
+            local ti_bold="$( { tput bold || tput md ; } 2>/dev/null )"
+            local ti_setaf
+            if tput setaf >/dev/null 2>&1 ; then
+                ti_setaf () { tput setaf "$1" ; }
+            elif tput AF >/dev/null 2>&1 ; then
+                # *BSD
+                ti_setaf () { tput AF "$1" ; }
+            else
+                [[ "$_LP_SHELL" = bash ]] && echo "liquidprompt: terminal $TERM not supported" >&2
+                ti_setaf () { : ; }
+            fi
 
-    # Colors: variables are local so they will have a value only
-    # during config loading and will not conflict with other values
-    # with the same names defined by the user outside the config.
-    local        BOLD="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}${_LP_CLOSE_ESC}"                             "%B"                  )"
+            # Colors: variables are local so they will have a value only
+            # during config loading and will not conflict with other values
+            # with the same names defined by the user outside the config.
+            local        BOLD="${_LP_OPEN_ESC}${ti_bold}${_LP_CLOSE_ESC}"
 
-    local       BLACK="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 0)${_LP_CLOSE_ESC}"                          "%F{black}"           )"
-    local   BOLD_GRAY="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 0)${_LP_CLOSE_ESC}"                "%B%F{black}"         )"
-    local       WHITE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 7)${_LP_CLOSE_ESC}"                          "%F{white}"           )"
-    local  BOLD_WHITE="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7)${_LP_CLOSE_ESC}"                "%B%F{white}"         )"
+            local       BLACK="${_LP_OPEN_ESC}$(ti_setaf 0)${_LP_CLOSE_ESC}"
+            local   BOLD_GRAY="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 0)${_LP_CLOSE_ESC}"
+            local       WHITE="${_LP_OPEN_ESC}$(ti_setaf 7)${_LP_CLOSE_ESC}"
+            local  BOLD_WHITE="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7)${_LP_CLOSE_ESC}"
 
-    local         RED="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 1)${_LP_CLOSE_ESC}"                          "%F{red}"             )"
-    local    BOLD_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 1)${_LP_CLOSE_ESC}"                "%B%F{red}"           )"
-    local    WARN_RED="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 0 ; tput setab 1)${_LP_CLOSE_ESC}"           "%F{black}%K{red}"    )"
-    local    CRIT_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{white}%K{red}"  )"
-    local  DANGER_RED="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3 ; tput setab 1)${_LP_CLOSE_ESC}" "%B%F{yellow}%K{red}" )"
+            local         RED="${_LP_OPEN_ESC}$(ti_setaf 1)${_LP_CLOSE_ESC}"
+            local    BOLD_RED="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 1)${_LP_CLOSE_ESC}"
+            local    WARN_RED="${_LP_OPEN_ESC}$(ti_setaf 0 ; tput setab 1)${_LP_CLOSE_ESC}"
+            local    CRIT_RED="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 7 ; tput setab 1)${_LP_CLOSE_ESC}"
+            local  DANGER_RED="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3 ; tput setab 1)${_LP_CLOSE_ESC}"
 
-    local       GREEN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 2)${_LP_CLOSE_ESC}"                          "%F{green}"           )"
-    local  BOLD_GREEN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 2)${_LP_CLOSE_ESC}"                "%B%F{green}"         )"
+            local       GREEN="${_LP_OPEN_ESC}$(ti_setaf 2)${_LP_CLOSE_ESC}"
+            local  BOLD_GREEN="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 2)${_LP_CLOSE_ESC}"
 
-    local      YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 3)${_LP_CLOSE_ESC}"                          "%F{yellow}"          )"
-    local BOLD_YELLOW="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3)${_LP_CLOSE_ESC}"                "%B%F{yellow}"        )"
+            local      YELLOW="${_LP_OPEN_ESC}$(ti_setaf 3)${_LP_CLOSE_ESC}"
+            local BOLD_YELLOW="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 3)${_LP_CLOSE_ESC}"
 
-    local        BLUE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 4)${_LP_CLOSE_ESC}"                          "%F{blue}"            )"
-    local   BOLD_BLUE="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 4)${_LP_CLOSE_ESC}"                "%B%F{blue}"          )"
+            local        BLUE="${_LP_OPEN_ESC}$(ti_setaf 4)${_LP_CLOSE_ESC}"
+            local   BOLD_BLUE="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 4)${_LP_CLOSE_ESC}"
 
-    local      PURPLE="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 5)${_LP_CLOSE_ESC}"                          "%F{magenta}"         )"
-    local        PINK="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 5)${_LP_CLOSE_ESC}"                "%B%F{magenta}"       )"
+            local      PURPLE="${_LP_OPEN_ESC}$(ti_setaf 5)${_LP_CLOSE_ESC}"
+            local        PINK="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 5)${_LP_CLOSE_ESC}"
 
-    local        CYAN="$( _lp_byshell "${_LP_OPEN_ESC}$(ti_setaf 6)${_LP_CLOSE_ESC}"                          "%F{cyan}"            )"
-    local   BOLD_CYAN="$( _lp_byshell "${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 6)${_LP_CLOSE_ESC}"                "%B%F{cyan}"          )"
+            local        CYAN="${_LP_OPEN_ESC}$(ti_setaf 6)${_LP_CLOSE_ESC}"
+            local   BOLD_CYAN="${_LP_OPEN_ESC}${ti_bold}$(ti_setaf 6)${_LP_CLOSE_ESC}"
 
-    # NO_COL is special: it will be used at runtime, not just during config loading
-               NO_COL="$( _lp_byshell "${_LP_OPEN_ESC}${ti_sgr0}${_LP_CLOSE_ESC}"                             "%b%u%s%f%k"          )"
+            # NO_COL is special: it will be used at runtime, not just during config loading
+                       NO_COL="${_LP_OPEN_ESC}${ti_sgr0}${_LP_CLOSE_ESC}"
 
-    unset ti_sgr0 ti_bold ti_setaf
+            unset ti_sgr0 ti_bold ti_setaf
 
+            ;;
+        zsh)
+            # Colors: variables are local so they will have a value only
+            # during config loading and will not conflict with other values
+            # with the same names defined by the user outside the config.
+            local        BOLD="%B"
+
+            local       BLACK="%F{black}"
+            local   BOLD_GRAY="%B%F{black}"
+            local       WHITE="%F{white}"
+            local  BOLD_WHITE="%B%F{white}"
+
+            local         RED="%F{red}"
+            local    BOLD_RED="%B%F{red}"
+            local    WARN_RED="%F{black}%K{red}"
+            local    CRIT_RED="%B%F{white}%K{red}"
+            local  DANGER_RED="%B%F{yellow}%K{red}"
+
+            local       GREEN="%F{green}"
+            local  BOLD_GREEN="%B%F{green}"
+
+            local      YELLOW="%F{yellow}"
+            local BOLD_YELLOW="%B%F{yellow}"
+
+            local        BLUE="%F{blue}"
+            local   BOLD_BLUE="%B%F{blue}"
+
+            local      PURPLE="%F{magenta}"
+            local        PINK="%B%F{magenta}"
+
+            local        CYAN="%F{cyan}"
+            local   BOLD_CYAN="%B%F{cyan}"
+
+            # NO_COL is special: it will be used at runtime, not just during config loading
+                       NO_COL="%b%u%s%f%k"
+
+            ;;
+    esac
 
     # Default values (globals)
     LP_BATTERY_THRESHOLD=${LP_BATTERY_THRESHOLD:-75}
@@ -480,11 +514,10 @@ _lp_proxy()
 _lp_shorten_path()
 {
     if [[ "$LP_ENABLE_SHORTEN_PATH" != 1 || -n "$PROMPT_DIRTRIM" ]] ; then
-        if $_LP_SHELL_bash; then
-            echo "\\w"
-        else
-            print -P '%~'
-        fi
+        case "$_LP_SHELL" in
+            bash) echo '\w' ;;
+            zsh)  echo '%~' ;;
+        esac
         return
     fi
 
@@ -492,81 +525,84 @@ _lp_shorten_path()
     local -i len=${#p}
     local -i max_len=$((${COLUMNS:-80}*$LP_PATH_LENGTH/100))
 
-    if $_LP_SHELL_bash; then
-        if (( len > max_len ))
-        then
-            # index of the directory to keep from the root
-            # (starts at 0 whith bash, 1 with zsh)
-            local -i keep=LP_PATH_KEEP-1
-            # the character that will replace the part of the path that is
-            # masked
-            local mask="$LP_MARK_SHORTEN_PATH"
-            local -i mask_len=${#mask}
-            # finds all the '/' in
-            # the path and stores their
-            # positions
-            #
-            local pos=()
-            local -i slashes=0
-            for ((i=0;i<len;i++))
-            do
-                if [[ "${p:i:1}" == / ]]
-                then
-                    pos=(${pos[@]} $i)
-                    let slashes++
+    case "$_LP_SHELL" in
+        bash)
+            if (( len > max_len ))
+            then
+                # index of the directory to keep from the root
+                # (starts at 0 whith bash, 1 with zsh)
+                local -i keep=LP_PATH_KEEP-1
+                # the character that will replace the part of the path that is
+                # masked
+                local mask="$LP_MARK_SHORTEN_PATH"
+                local -i mask_len=${#mask}
+                # finds all the '/' in
+                # the path and stores their
+                # positions
+                #
+                local pos=()
+                local -i slashes=0
+                for ((i=0;i<len;i++))
+                do
+                    if [[ "${p:i:1}" == / ]]
+                    then
+                        pos=(${pos[@]} $i)
+                        let slashes++
+                    fi
+                done
+                pos=(${pos[@]} $len)
+
+                # we have the '/'s, let's find the
+                # left-most that doesn't break the
+                # length limit
+                #
+                local -i i=keep
+                if (( keep > slashes )) ; then
+                    i=slashes
                 fi
-            done
-            pos=(${pos[@]} $len)
+                while (( len-pos[i] > max_len-mask_len ))
+                do
+                    let i++
+                done
 
-            # we have the '/'s, let's find the
-            # left-most that doesn't break the
-            # length limit
-            #
-            local -i i=keep
-            if (( keep > slashes )) ; then
-                i=slashes
-            fi
-            while (( len-pos[i] > max_len-mask_len ))
-            do
-                let i++
-            done
-
-            # let us check if it's OK to
-            # print the whole thing
-            #
-            if (( pos[i] == 0 ))
-            then
-                # the path is shorter than
-                # the maximum allowed length,
-                # so no need for '…'
+                # let us check if it's OK to
+                # print the whole thing
                 #
-                echo "$p"
+                if (( pos[i] == 0 ))
+                then
+                    # the path is shorter than
+                    # the maximum allowed length,
+                    # so no need for '…'
+                    #
+                    echo "$p"
 
-            elif (( pos[i] == len ))
-            then
-                # constraints are broken because
-                # the maximum allowed size is smaller
-                # than the last part of the path, plus
-                # ' … '
-                #
-                echo "${p:0:pos[keep]+1}${mask}${p:len-max_len+mask_len}"
+                elif (( pos[i] == len ))
+                then
+                    # constraints are broken because
+                    # the maximum allowed size is smaller
+                    # than the last part of the path, plus
+                    # ' … '
+                    #
+                    echo "${p:0:pos[keep]+1}${mask}${p:len-max_len+mask_len}"
+                else
+                    # constraints are satisfied, at least
+                    # some parts of the path, plus ' … ', are
+                    # shorter than the maximum allowed size
+                    #
+                    echo "${p:0:pos[keep]+1}${mask}${p:pos[i]}"
+                fi
             else
-                # constraints are satisfied, at least
-                # some parts of the path, plus ' … ', are
-                # shorter than the maximum allowed size
-                #
-                echo "${p:0:pos[keep]+1}${mask}${p:pos[i]}"
+                echo "$p"
             fi
-        else
-            echo "$p"
-        fi
-    else # zsh
-        if (( len > max_len )); then
-            print -P "%-${LP_PATH_KEEP}~%${max_len}<${LP_MARK_SHORTEN_PATH}<%~%<<"
-        else
-            print -P '%~'
-        fi
-    fi
+            ;;
+        zsh)
+            if (( len > max_len )); then
+                print -P "%-${LP_PATH_KEEP}~%${max_len}<${LP_MARK_SHORTEN_PATH}<%~%<<"
+            else
+                print -P '%~'
+            fi
+            ;;
+    esac
 }
 
 # In bash shell, PROMPT_DIRTRIM is the number of directory to keep at the end
@@ -1122,11 +1158,10 @@ _lp_battery_color()
                 ret="${ret}${LP_COLORMAP_0}"
             fi
 
-            if $_LP_SHELL_bash; then
-                ret="${ret}${bat}%"
-            else # zsh
-                ret="${ret}${bat}%%"
-            fi
+            case "$_LP_SHELL" in
+                bash) ret="${ret}${bat}%"  ;;
+                zsh)  ret="${ret}${bat}%%" ;;
+            esac
         fi # LP_PERCENTS_ALWAYS
         echo -ne "${ret}${NO_COL}"
     fi # ret
@@ -1183,11 +1218,10 @@ _lp_load_color()
         local ret="$(_lp_color_map $load) ${LP_MARK_LOAD}"
 
         if [[ "$LP_PERCENTS_ALWAYS" -eq "1" ]]; then
-            if $_LP_SHELL_bash; then
-                ret="${ret}$load%"
-            else # zsh
-                ret="${ret}$load%%"
-            fi
+            case "$_LP_SHELL" in
+                bash) ret="${ret}$load%"  ;;
+                zsh)  ret="${ret}$load%%" ;;
+            esac
         fi
         echo -ne "${ret}${NO_COL}"
     fi
@@ -1294,11 +1328,14 @@ _lp_smart_mark()
     local mark
     if [[ -n "$LP_MARK_DEFAULT" ]]; then
         mark=$LP_MARK_DEFAULT
-    elif $_LP_SHELL_zsh; then
-        mark="%(!.#.%%)"
     else
         mark="\\\$"
+        case "$_LP_SHELL" in
+            bash) mark='\$' ;;
+            zsh)  mark='%#' ;;
+        esac
     fi
+
     if [[ "$1" == "git" ]]; then
         mark=$LP_MARK_GIT
     elif [[ "$1" == "git-svn" ]]; then
@@ -1545,18 +1582,16 @@ prompt_on()
     # if liquidprompt has not been already set
     if [[ -z "$LP_LIQUIDPROMPT" ]] ; then
         LP_OLD_PS1="$PS1"
-        if $_LP_SHELL_bash; then
-            LP_OLD_PROMPT_COMMAND="$PROMPT_COMMAND"
-        else # zsh
-            LP_OLD_PROMPT_COMMAND="$precmd"
-        fi
-    fi
-    if $_LP_SHELL_bash; then
-        PROMPT_COMMAND=_lp_set_prompt
-    else # zsh
-        function precmd {
-            _lp_set_prompt
-        }
+        case "$_LP_SHELL" in
+            bash) LP_OLD_PROMPT_COMMAND="$PROMPT_COMMAND" 
+                  PROMPT_COMMAND=_lp_set_prompt
+                  ;;
+            zsh)  LP_OLD_PROMPT_COMMAND="$precmd"
+                  function precmd {
+                      _lp_set_prompt
+                  }
+                  ;;
+        esac
     fi
 
     # Keep in mind that LP has been sourced
@@ -1568,22 +1603,25 @@ prompt_on()
 prompt_off()
 {
     PS1=$LP_OLD_PS1
-    if $_LP_SHELL_bash; then
-        PROMPT_COMMAND=$LP_OLD_PROMPT_COMMAND
-    else # zsh
-        precmd=$LP_OLD_PROMPT_COMMAND
-    fi
+    case "$_LP_BASH" in
+        bash) PROMPT_COMMAND=$LP_OLD_PROMPT_COMMAND ;;
+        zsh)  precmd=$LP_OLD_PROMPT_COMMAND ;;
+    esac
 }
 
-# Use an empty prompt: just the \$ mark
+# Use an empty prompt: just the default prompt
 prompt_OFF()
 {
-    PS1="\$ "
-    if $_LP_SHELL_bash; then
-        PROMPT_COMMAND=$LP_OLD_PROMPT_COMMAND
-    else # zsh
-        precmd=$LP_OLD_PROMPT_COMMAND
-    fi
+    case "$_LP_SHELL" in
+        bash)
+            PS1='\s-\v\$ '
+            PROMPT_COMMAND=$LP_OLD_PROMPT_COMMAND
+            ;;
+        zsh)
+            PS1='%m%# '
+            precmd=$LP_OLD_PROMPT_COMMAND
+            ;;
+    esac
 }
 
 # By default, sourcing liquidprompt.bash will activate the liquid prompt
